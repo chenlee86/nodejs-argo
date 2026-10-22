@@ -21,7 +21,7 @@ const NEZHA_PORT = process.env.NEZHA_PORT || '';            // 使用哪吒v1请
 const NEZHA_KEY = process.env.NEZHA_KEY || '';              // 哪吒v1的NZ_CLIENT_SECRET或哪吒v0的agent密钥
 const ARGO_DOMAIN = process.env.ARGO_DOMAIN || 'dtyv7g.bot-keep.xyz';          // 固定隧道域名,留空即启用临时隧道
 const ARGO_AUTH = process.env.ARGO_AUTH || '';              // 固定隧道密钥json或token,留空即启用临时隧道,json获取地址：https://json.zone.id
-const ARGO_PORT = process.env.ARGO_PORT || 30321;            // 固定隧道端口,使用token需在cloudflare后台设置和这里一致
+const ARGO_PORT = process.env.ARGO_PORT || process.env.SERVER_PORT || 30321;            // 固定隧道端口,使用token需在cloudflare后台设置和这里一致
 const S5_PORT = process.env.S5_PORT || '';                  // socks5端口，支持多端口的可以填写，否则留空
 const HY2_PORT = process.env.HY2_PORT || '30321';                // hy2端口，支持多端口的可以填写，否则留空
 const REALITY_PORT = process.env.REALITY_PORT || '';        // reality端口，支持多端口的可以填写，否则留空
@@ -250,7 +250,7 @@ async function generateConfig() {
   const config = {
     log: { access: '/dev/null', error: '/dev/null', loglevel: 'none' },
     inbounds: [
-      { tag: 'vless-fallback-in', port: ARGO_PORT, listen: '::', protocol: 'vless', settings: { clients: [{ id: UUID, flow: 'xtls-rprx-vision' }], decryption: 'none', fallbacks: [{ dest: 3001 }, { path: "/vless-argo", dest: 3002 }, { path: "/vmess-argo", dest: 3003 }, { path: "/trojan-argo", dest: 3004 }] }, streamSettings: { network: 'tcp' } },
+      { tag: 'vless-fallback-in', port: ARGO_PORT, listen: '0.0.0.0', protocol: 'vless', settings: { clients: [{ id: UUID, flow: 'xtls-rprx-vision' }], decryption: 'none', fallbacks: [{ dest: 3001 }, { path: "/vless-argo", dest: 3002 }, { path: "/vmess-argo", dest: 3003 }, { path: "/trojan-argo", dest: 3004 }] }, streamSettings: { network: 'tcp' } },
       { tag: 'vless-tcp-in', port: 3001, listen: "127.0.0.1", protocol: "vless", settings: { clients: [{ id: UUID }], decryption: "none" }, streamSettings: { network: "tcp", security: "none" } },
       { tag: 'vless-ws-in', port: 3002, listen: "127.0.0.1", protocol: "vless", settings: { clients: [{ id: UUID, level: 0 }], decryption: "none" }, streamSettings: { network: "ws", security: "none", wsSettings: { path: "/vless-argo" } }, sniffing: { enabled: true, destOverride: ["http", "tls", "quic"], metadataOnly: false } },
       { tag: 'vmess-ws-in', port: 3003, listen: "127.0.0.1", protocol: "vmess", settings: { clients: [{ id: UUID, alterId: 0 }] }, streamSettings: { network: "ws", wsSettings: { path: "/vmess-argo" } }, sniffing: { enabled: true, destOverride: ["http", "tls", "quic"], metadataOnly: false } },
@@ -264,7 +264,7 @@ async function generateConfig() {
   if (isValidPort(REALITY_PORT)) {
     config.inbounds.push({
       tag: "vless-in",
-      listen: "::",
+      listen: "0.0.0.0",
       port: parseInt(REALITY_PORT),
       protocol: "vless",
       settings: {
@@ -290,7 +290,7 @@ async function generateConfig() {
   if (isValidPort(HY2_PORT)) {
     config.inbounds.push({
       tag: "hysteria-in",
-      listen: "::",
+      listen: "0.0.0.0",
       port: parseInt(HY2_PORT),
       protocol: "hysteria",
       settings: {
@@ -324,7 +324,7 @@ async function generateConfig() {
   if (isValidPort(S5_PORT)) {
     config.inbounds.push({
       tag: "s5-in",
-      listen: "::",
+      listen: "0.0.0.0",
       port: parseInt(S5_PORT),
       protocol: "socks",
       settings: {
